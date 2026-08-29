@@ -1,0 +1,42 @@
+{
+  "name": "final-hackathon",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/sadiaather/final-hackathon#readme",
+  "bugs": {
+    "url": "https://github.com/sadiaather/final-hackathon/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sadiaather/final-hackathon.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "chalk": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "io": "^1.5.8",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.9.4",
+    "node": "^26.8.1",
+    "nodemon": "^3.1.14",
+    "react": "^19.2.8",
+    "react-router-dom": "^7.18.3",
+    "router": "^2.2.0",
+    "socket": "^1.1.162",
+    "socket.io": "^4.8.3"
+  },
+  "allowScripts": {
+    "node@26.8.1": true,
+    "bcrypt@6.0.0": true
+  }
+}
