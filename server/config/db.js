@@ -9,7 +9,9 @@ const dbConection = process.env.MONGODB_URL
 const connectDB = async()=>{
    console.log(dbConection)
    try {
-    await mongoose.connect(dbConection)
+    await mongoose.connect(dbConection,{
+      dbname : "final-hackathon"
+    })
     
       console.log(chalk.blue.bgRed.bold('MongoDB connected successfully'));
    }

@@ -1,94 +1,116 @@
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
-import dotenv from "dotenv"
-import User from "../model/UserModel.js"
-
-dotenv.config()
+import User from "../model/UserModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 const secret = process.env.secret
 
 
+// register
+export const register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-export const signup = async (req,res)=>{
- 
-    const {name,email,password}=  req.body
-   console.log(req.body);
-
-try{
-    if(!name || !email || !password){
-        res.status(400).json({
-            success : false,
-            message : "data not found"
-        })
-        return
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
-     const  hashedPassword = await bcrypt.hash(password,10)   
+    const existingUser = await User.findOne({ email });
 
-     const result = await User.create({
-        name,email,password:hashedPassword,
-     })
- 
-     const token = jwt.sign({
-        userId : result._id},secret)
+    if (existingUser) {
+      return res.status(400).json({
+        message: "User already exists",
+      });
+    }
 
-        
-        
-       return res.status(200).json({
-            success : true,
-            message : "user created successfuly",
-            token,
-            data : result
-        })
-}catch(error){
-    console.log(error.message);
-     return res.status(500).json({
-      success: false,
-      message: error.message,
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "customer",
     });
-}
-}
 
-export const login = async (req,res)=>{
-    const {email , password}= req.body
-    
+    res.status(201).json({
+      message: "Registration successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
 
-   try{
-     const result = await User.findOne({email})
-console.log(result);
+    res.status(500).json({
+      message: "Registration failed",
+      error: error.message,
+    });
+  }
+};
 
-       if(!result){
-      return  res.status(502).json({
-        success : false,
-        message : " user not found"
-        })
-    
+// login
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
     }
-    const isMatch = await bcrypt.compare(password,result.password)
-    if(!isMatch){
-     return   res.status(401).json({
-            success : false,
-            message: "invalid password"
-        })
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
     }
 
-    if (result.isBlocked) {
-  return res.status(403).json({
-    message: "Your account has been blocked by admin",
-  });
-}
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-    const token = jwt.sign({userId:result._id},secret)
-    return res.status(200).json({
-        success : true,
-        message : "user login successfuly ",
-        token,
-    })
-   }catch(error){
-    console.log(error .message);
-     return res.status(500).json({
-            success: false,
-            message: error.message
-        })
-   }
-}
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        message: "Invalid email or password",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+      },
+      secret,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Login failed",
+      error: error.message,
+    });
+  }
+};
